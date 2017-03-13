@@ -70,7 +70,7 @@ class baseServer {
     baseServer(unsigned short port, size_t num_threads = 1)
         : endpoint(boost::asio::ip::tcp::v4(), port),
           acceptor(m_io_service, endpoint),
-          num_threads(num_threads);
+          num_threads(num_threads){};
 
    protected:
     boost::asio::io_service m_io_service;
@@ -86,10 +86,12 @@ class baseServer {
     virtual void accept(){};
 
     void process_request_and_respond(std::shared_ptr<socket_type> socket) const;
+
+    void respond(std::shared_ptr<socket_type>, std::shared_ptr<Request>) const;
 };
 
 template <typename socket_type>
-void baseServer::start() {
+void baseServer<socket_type>::start() {
     // Put the default resource in the back;
     for (auto it = resource.begin(); it != resource.end(); ++it) {
         all_resources.push_back(it);
@@ -115,7 +117,8 @@ void baseServer::start() {
 }
 
 template <typename socket_type>
-void process_request_and_respond(std::shared_ptr<socket_type> socket) {
+void baseServer<socket_type>::process_request_and_respond(
+    std::shared_ptr<socket_type> socket) const {
     // read buffer
     auto read_buffer = std::make_shared<boost::asio::streambuf>();
 
@@ -159,8 +162,8 @@ void process_request_and_respond(std::shared_ptr<socket_type> socket) {
 }
 
 template <typename socket_type>
-void respond(std::shared_ptr<socket_type> socket,
-             std::shared_ptr<Request> request) {
+void baseServer<socket_type>::respond(std::shared_ptr<socket_type> socket,
+             std::shared_ptr<Request> request) const {
     for (auto res_it : all_resources) {
         std::regex e(res_it->first);
         std::smatch res;
@@ -170,14 +173,14 @@ void respond(std::shared_ptr<socket_type> socket,
 
                 auto write_buffer = std::make_shared<boost::asio::streambuf>();
                 std::ostream response(write_buffer.get());
-                res_it->second[request->method](respond, *request);
+                res_it->second[request->method](response, *request);
 
                 boost::asio::async_write(
                     *socket, *write_buffer,
                     [this, socket, request, write_buffer](
                         const boost::system::error_code& ec,
                         size_t bytes_transferred) {
-                        if (!ec && stof(request - http_version) > 1.05)
+                        if (!ec && stof(request->http_version) > 1.05)
                             process_request_and_respond(socket);
                     });
                 return;
@@ -187,7 +190,7 @@ void respond(std::shared_ptr<socket_type> socket,
 }
 
 template <typename socket_type>
-class erver : public baseSever<socket_type> {};
+class Server : public baseServer<socket_type> {};
 }
 
 #endif
