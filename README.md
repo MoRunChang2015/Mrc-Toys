@@ -17,7 +17,8 @@ make http
 bin/httpServer
 ```
 + For https
-1. Create a certificate and private key (in example/ssl/)
+
+> + Create a certificate and private key (in example/ssl/)
 ```bash
 openssl genrsa -des3 -out server.key 1024
 openssl req -new -key server.key -out server.csr
@@ -26,7 +27,7 @@ openssl rsa -in server.key.bk -out server.key
 openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 ```
 
-2. make httpsServer and run
+> + make httpsServer and run
 ```
 make https
 bin/httpsServer
