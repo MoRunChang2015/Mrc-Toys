@@ -1,27 +1,19 @@
-CC := g++
-# CC=clang++ --analyze
-
-SRCDIR := example
 BUILDDIR := build
-TARGET := bin/httpServer
+TARGET := bin/httpServer bin/httpsServer
 
-SRCEXT := cpp
-SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
-OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
-CFLAGS := -g -w -std=c++11
-INC := -I include
-BOOST_INC := -I/usr/include/boost
-LIB := -L/usr/lib -lboost_system -pthread
+all:
+	@make http
+	@make https
 
-$(TARGET) : $(OBJECTS)
-	@echo " Linking "
-	@mkdir -p bin
-	@echo " $(CC) $^ -o $(TARGET) $(LIB) $(LINKER) $(BOOST_INC)"; $(CC) $^ -o $(TARGET) $(LIB) $(BOOST_INC)
+http:
+	@make -f Makefile_http
 
-$(BUILDDIR)/%.o : $(SRCDIR)/%.$(SRCEXT)
-	@mkdir -p $(BUILDDIR)
-	@echo " $(CC) $(CFLAGS) $(INC) $(LIB) -c -o $@ $<"; $(CC) $(CFLAGS) $(INC) -c -o $@ $<
+.PHONY: http
 
+https:
+	@make -f Makefile_https
+
+.PHONY: https
 
 clean:
 	@echo " Cleaning... "
