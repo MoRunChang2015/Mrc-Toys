@@ -58,6 +58,44 @@ inline typename MemoryPool<T, BlockSize>::const_pointer MemoryPool::address(
     return &x;
 }
 
+size_t calculate_padding(void* ptr, size_t align) {
+    auto result = reinterpret_cast<uintptr_t>(ptr);
+    return (align - result) % align;
+}
+
+template <typename T, size_t BlockSize>
+void allocateBlock() {
+    /**
+     * Block structure:
+     * current_block
+     * |   current_slot
+     * |   |                                  last_slot
+     * |   |                                  |
+     * +--------------------------------------+
+     * | | | slot | slot | slot | slot | slot |
+     * +--------------------------------------+
+     *  ^ ^
+     *  | |
+     *  | padding
+     *  slot_pointer to previous block
+     *
+     *  free_slot -> +-----------+
+     *               | free slot | -> +-----------+
+     *               +-----------+    | free slot | -> nullptr
+     *                                +-----------+
+     */
+    data_pointer newBlock =
+        reinterpret_cast<data_pointer>(operator new(BlockSize));
+    reinterpret_cast<slot_pointer>(newBlock)->next = current_block;
+    current_block = reinterpret_cast<slot_pointer>(newBlock);
+
+    auto padding =
+        calculate_padding(newBlock + sizeof(slot_pointer), alignof(slot_type));
+    current_slot = reinterpret_cast<slot_pointer>(
+        newBlock + sizeof(slot_pointer) + padding);
+    last_slot = reinterpret_cast<slot_pointer>(newBlock + BlockSize);
+}
+
 template <typename T, size_t BlockSize>
 typename MemoryPool<T, BlockSize>::pointer MemoryPool::allocate(
     size_t n, const_pointer hint) {}

@@ -128,9 +128,9 @@ class MemoryPool {
     // free slot list
     slot_pointer free_slot;
 
-	/**
-	 * @Brief allocate a new block
-	 */
+    /**
+     * @Brief allocate a new block
+     */
     void allocateBlock();
 
     static_assert(BlockSize >= 2 * sizeof(slot_type), "BlockSize too small.");
