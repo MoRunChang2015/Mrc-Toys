@@ -25,7 +25,7 @@ class MemoryPool {
      */
     template <typename U>
     struct rebind {
-        using MemoryPool<U> = other;
+        using other = MemoryPool<U>;
     };
 
     // constructors
@@ -122,6 +122,24 @@ class MemoryPool {
     using slot_type = slot;
     using slot_pointer = slot*;
 
+    /**
+     * Block structure:
+     * current_block
+     * |   current_slot                     last_slot
+     * |   |                                |
+     * |   |                                |<slot>|
+     * +-------------------------------------------+
+     * | | | slot | slot | slot | slot | slot |    |
+     * +-------------------------------------------+
+     *  ^ ^
+     *  | |
+     *  | padding
+     *  slot_pointer to previous block
+     *
+     *               +-----------+    +-----------+
+     *  free_slot -> | free slot | -> | free slot | -> NULL
+     *               +-----------+    +-----------+
+     */
     slot_pointer current_block;
     slot_pointer current_slot;
     slot_pointer last_slot;

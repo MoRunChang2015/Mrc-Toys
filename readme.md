@@ -6,6 +6,7 @@ This repository contains MoRunChang's toys for black magic codes or experiments:
 * Web Server Farmework
 * MD5 Algorithm
 * Thread Pool
+* Memory Pool
 
 
 
@@ -55,6 +56,31 @@ A Simple Thread Pool in C++14
     std::cout << result.get() << std::endl;
 ```
 
+
+### Memory Pool
+
+A Simple Memory Pool in C++11
+
++ No memory fragmentation.
+
++ Better performance then `std::allocate<T>`
+
++ Usage:
+```C++
+    MemoryPool<ELEMENT_TYPE, BLOCK_SIZE> pool;
+    auto p = pool.allocate();
+    pool.construct(p, args...);
+    // or
+    auto q = pool.newElement(args...);
+    /**
+     * do something with p, q
+     */
+    pool.destory(p);
+    pool.deallocate(p);
+    // or
+    pool.deleteElement(q);
+    
+```
 
 
 
