@@ -63,7 +63,7 @@ A Simple Memory Pool in C++11
 
 + No memory fragmentation.
 
-+ Better performance then `std::allocate<T>`
++ Better performance then `std::allocate<T>`, in some cases.
 
 + Usage:
 ```C++
